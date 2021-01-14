@@ -28,7 +28,7 @@ import org.gradle.plugins.ide.eclipse.EclipsePlugin;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 
 /**
- * A {@Plugin} to configure integration testing support in a {@link Project}.
+ * A {@link Plugin} to configure integration testing support in a {@link Project}.
  *
  * @author Andy Wilkinson
  */
@@ -46,7 +46,7 @@ public class IntegrationTestPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
-		project.getPlugins().withType(JavaPlugin.class, (javaPlugin) -> this.configureIntegrationTesting(project));
+		project.getPlugins().withType(JavaPlugin.class, (javaPlugin) -> configureIntegrationTesting(project));
 	}
 
 	private void configureIntegrationTesting(Project project) {

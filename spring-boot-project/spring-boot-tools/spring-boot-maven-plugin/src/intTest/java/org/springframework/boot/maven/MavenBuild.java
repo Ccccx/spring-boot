@@ -39,11 +39,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.function.Consumer;
 
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
-import org.apache.maven.shared.invoker.InvocationOutputHandler;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
@@ -56,7 +54,7 @@ import static org.assertj.core.api.Assertions.contentOf;
  * Helper class for executing a Maven build.
  *
  * @author Andy Wilkinson
- *
+ * @author Scott Frederick
  */
 class MavenBuild {
 
@@ -69,6 +67,8 @@ class MavenBuild {
 	private final List<String> goals = new ArrayList<>();
 
 	private final Properties properties = new Properties();
+
+	private ProjectCallback preparation;
 
 	private File projectDir;
 
@@ -84,14 +84,14 @@ class MavenBuild {
 		this.pomReplacements.put("project.groupId", "org.springframework.boot");
 		this.pomReplacements.put("project.artifactId", "spring-boot-maven-plugin");
 		this.pomReplacements.put("project.version", determineVersion());
-		this.pomReplacements.put("log4j2.version", "2.12.1");
+		this.pomReplacements.put("log4j2.version", "2.13.3");
 		this.pomReplacements.put("maven-jar-plugin.version", "3.2.0");
 		this.pomReplacements.put("maven-toolchains-plugin.version", "3.0.0");
 		this.pomReplacements.put("maven-war-plugin.version", "3.2.3");
 		this.pomReplacements.put("build-helper-maven-plugin.version", "3.0.0");
-		this.pomReplacements.put("spring-framework.version", "5.2.1.RELEASE");
-		this.pomReplacements.put("jakarta-servlet.version", "4.0.2");
-		this.pomReplacements.put("kotlin.version", "1.3.60");
+		this.pomReplacements.put("spring-framework.version", "5.3.0");
+		this.pomReplacements.put("jakarta-servlet.version", "4.0.4");
+		this.pomReplacements.put("kotlin.version", "1.4.10");
 	}
 
 	MavenBuild project(String project) {
@@ -109,7 +109,20 @@ class MavenBuild {
 		return this;
 	}
 
-	void execute(Consumer<File> callback) {
+	MavenBuild prepare(ProjectCallback callback) {
+		this.preparation = callback;
+		return this;
+	}
+
+	void execute(ProjectCallback callback) {
+		execute(callback, 0);
+	}
+
+	void executeAndFail(ProjectCallback callback) {
+		execute(callback, 1);
+	}
+
+	private void execute(ProjectCallback callback, int expectedExitCode) {
 		Invoker invoker = new DefaultInvoker();
 		invoker.setMavenHome(this.home);
 		InvocationRequest request = new DefaultInvocationRequest();
@@ -151,33 +164,33 @@ class MavenBuild {
 			Files.write(destination.resolve("settings.xml"), settingsXml.getBytes(StandardCharsets.UTF_8),
 					StandardOpenOption.CREATE_NEW);
 			request.setBaseDirectory(this.temp);
+			request.setJavaHome(new File(System.getProperty("java.home")));
 			request.setProperties(this.properties);
 			request.setGoals(this.goals.isEmpty() ? Collections.singletonList("package") : this.goals);
 			request.setUserSettingsFile(new File(this.temp, "settings.xml"));
 			request.setUpdateSnapshots(true);
 			request.setBatchMode(true);
+			// request.setMavenOpts("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000");
 			File target = new File(this.temp, "target");
 			target.mkdirs();
+			if (this.preparation != null) {
+				this.preparation.doWith(this.temp);
+			}
 			File buildLogFile = new File(target, "build.log");
 			try (PrintWriter buildLog = new PrintWriter(new FileWriter(buildLogFile))) {
-				request.setOutputHandler(new InvocationOutputHandler() {
-
-					@Override
-					public void consumeLine(String line) {
-						buildLog.println(line);
-						buildLog.flush();
-					}
-
+				request.setOutputHandler((line) -> {
+					buildLog.println(line);
+					buildLog.flush();
 				});
 				try {
 					InvocationResult result = invoker.execute(request);
-					assertThat(result.getExitCode()).as(contentOf(buildLogFile)).isEqualTo(0);
+					assertThat(result.getExitCode()).as(contentOf(buildLogFile)).isEqualTo(expectedExitCode);
 				}
 				catch (MavenInvocationException ex) {
 					throw new RuntimeException(ex);
 				}
 			}
-			callback.accept(this.temp);
+			callback.doWith(this.temp);
 		}
 		catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -197,6 +210,21 @@ class MavenBuild {
 		catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+
+	/**
+	 * Action to take on a maven project directory.
+	 */
+	@FunctionalInterface
+	public interface ProjectCallback {
+
+		/**
+		 * Take the action on the given project.
+		 * @param project the project directory
+		 * @throws Exception on error
+		 */
+		void doWith(File project) throws Exception;
+
 	}
 
 }

@@ -11,8 +11,8 @@ It serves as a map for the rest of the document.
 == About the Documentation
 The Spring Boot reference guide is available as:
 
-* {spring-boot-docs}/html[Multi-page HTML]
-* {spring-boot-docs}/htmlsingle[Single page HTML]
+* {spring-boot-docs}/html/[Multi-page HTML]
+* {spring-boot-docs}/htmlsingle/[Single page HTML]
 * {spring-boot-docs}/pdf/spring-boot-reference.pdf[PDF]
 
 The latest copy is available at {spring-boot-current-docs}.
@@ -37,6 +37,18 @@ If you have trouble with Spring Boot, we would like to help.
 
 NOTE: All of Spring Boot is open source, including the documentation.
 If you find problems with the docs or if you want to improve them, please {spring-boot-code}[get involved].
+
+
+
+[[boot-documentation-upgrading]]
+== Upgrading from an Earlier Version
+Instructions for how to upgrade from earlier versions of Spring Boot are provided on the project {github-wiki}[wiki].
+Follow the links in the {github-wiki}#release-notes[release notes] section to find the version that you want to upgrade to.
+
+Upgrading instructions are always the first item in the release notes.
+If you are more than one release behind, please make sure that you also review the release notes of the versions that you jumped.
+
+You should always ensure that you are running a {github-wiki}/Supported-Versions[supported version] of Spring Boot.
 
 
 
@@ -88,4 +100,4 @@ Finally, we have a few topics for more advanced users:
 
 * *Spring Boot Applications Deployment:* <<deployment.adoc#cloud-deployment, Cloud Deployment>> | <<deployment.adoc#deployment-service, OS Service>>
 * *Build tool plugins:* <<build-tool-plugins.adoc#build-tool-plugins-maven-plugin, Maven>> | <<build-tool-plugins.adoc#build-tool-plugins-gradle-plugin, Gradle>>
-* *Appendix:* <<appendix-application-properties.adoc#common-application-properties,Application Properties>> | <<appendix-configuration-metadata.adoc#configuration-metadata,Configuration Metadata>> | <<appendix-auto-configuration-classes.adoc#auto-configuration-classes,Auto-configuration Classes>> | <<appendix-test-auto-configuration.adoc#test-auto-configuration,Test Auto-configuration Annotations>> | <<appendix-executable-jar-format.adoc#executable-jar,Executable Jars>> | <<appendix-dependency-versions.adoc#appendex-dependency-versions,Dependency Versions>>
+* *Appendix:* <<appendix-application-properties.adoc#common-application-properties,Application Properties>> | <<appendix-configuration-metadata.adoc#configuration-metadata,Configuration Metadata>> | <<appendix-auto-configuration-classes.adoc#auto-configuration-classes,Auto-configuration Classes>> | <<appendix-test-auto-configuration.adoc#test-auto-configuration,Test Auto-configuration Annotations>> | <<appendix-executable-jar-format.adoc#executable-jar,Executable Jars>> | <<appendix-dependency-versions.adoc#dependency-versions,Dependency Versions>>

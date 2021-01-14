@@ -41,9 +41,9 @@ git reset --hard HEAD^ > /dev/null
 if [[ $nextVersion != $snapshotVersion ]]; then
 	echo "Setting next development version (v$nextVersion)"
 	sed -i "s/version=$snapshotVersion/version=$nextVersion/" gradle.properties
-	git add pom.xml > /dev/null
+	git add gradle.properties > /dev/null
 	git commit -m"Next development version (v$nextVersion)" > /dev/null
-fi;
+fi
 
 echo "DONE"
 

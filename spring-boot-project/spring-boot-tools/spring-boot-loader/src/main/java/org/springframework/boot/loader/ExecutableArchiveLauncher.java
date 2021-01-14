@@ -89,7 +89,7 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 		if (this.classPathIndex != null) {
 			urls.addAll(this.classPathIndex.getUrls());
 		}
-		return super.createClassLoader(urls.toArray(new URL[0]));
+		return createClassLoader(urls.toArray(new URL[0]));
 	}
 
 	private int guessClassPathSize() {
@@ -101,17 +101,18 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 
 	@Override
 	protected Iterator<Archive> getClassPathArchivesIterator() throws Exception {
-		Archive.EntryFilter searchFilter = (entry) -> isSearchCandidate(entry) && !isFolderIndexed(entry);
-		Iterator<Archive> archives = this.archive.getNestedArchives(searchFilter, this::isNestedArchive);
+		Archive.EntryFilter searchFilter = this::isSearchCandidate;
+		Iterator<Archive> archives = this.archive.getNestedArchives(searchFilter,
+				(entry) -> isNestedArchive(entry) && !isEntryIndexed(entry));
 		if (isPostProcessingClassPathArchives()) {
 			archives = applyClassPathArchivePostProcessing(archives);
 		}
 		return archives;
 	}
 
-	private boolean isFolderIndexed(Archive.Entry entry) {
+	private boolean isEntryIndexed(Archive.Entry entry) {
 		if (this.classPathIndex != null) {
-			return this.classPathIndex.containsFolder(entry.getName());
+			return this.classPathIndex.containsEntry(entry.getName());
 		}
 		return false;
 	}
@@ -126,9 +127,10 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 	}
 
 	/**
-	 * Determine if the specified entry is a a candidate for further searching.
+	 * Determine if the specified entry is a candidate for further searching.
 	 * @param entry the entry to check
 	 * @return {@code true} if the entry is a candidate for further searching
+	 * @since 2.3.0
 	 */
 	protected boolean isSearchCandidate(Archive.Entry entry) {
 		return true;
@@ -138,7 +140,7 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 	 * Determine if the specified entry is a nested item that should be added to the
 	 * classpath.
 	 * @param entry the entry to check
-	 * @return {@code true} if the entry is a nested item (jar or folder)
+	 * @return {@code true} if the entry is a nested item (jar or directory)
 	 */
 	protected abstract boolean isNestedArchive(Archive.Entry entry);
 
@@ -148,6 +150,7 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 	 * {@link #postProcessClassPathArchives(List)} should provide an implementation that
 	 * returns {@code false}.
 	 * @return if the {@link #postProcessClassPathArchives(List)} method is implemented
+	 * @since 2.3.0
 	 */
 	protected boolean isPostProcessingClassPathArchives() {
 		return true;
@@ -164,14 +167,11 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
 	}
 
 	@Override
-	protected boolean supportsNestedJars() {
-		return this.archive.supportsNestedJars();
+	protected boolean isExploded() {
+		return this.archive.isExploded();
 	}
 
-	/**
-	 * Return the root archive.
-	 * @return the root archive
-	 */
+	@Override
 	protected final Archive getArchive() {
 		return this.archive;
 	}

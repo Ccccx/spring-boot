@@ -1,10 +1,11 @@
 plugins {
-	id 'java-library'
-	id 'org.springframework.boot.conventions'
-	id 'org.springframework.boot.deployed'
+	id "java-library"
+	id "org.springframework.boot.conventions"
+	id "org.springframework.boot.deployed"
+	id "org.springframework.boot.annotation-processor"
 }
 
-description = 'Spring Boot Configuration Annotation Processor'
+description = "Spring Boot Configuration Annotation Processor"
 
 sourceSets {
 	main {
@@ -15,13 +16,14 @@ sourceSets {
 }
 
 dependencies {
-	testImplementation enforcedPlatform(project(":spring-boot-project:spring-boot-dependencies"))
-	testImplementation project(":spring-boot-project:spring-boot-tools:spring-boot-test-support")
-	testImplementation "javax.validation:validation-api"
-	testImplementation "org.assertj:assertj-core"
-	testImplementation "org.hamcrest:hamcrest-library"
-	testImplementation "org.junit.jupiter:junit-jupiter"
-	testImplementation "org.mockito:mockito-core"
-	testImplementation "org.projectlombok:lombok"
-	testImplementation "org.springframework:spring-core"
+	testCompileOnly("com.google.code.findbugs:jsr305:3.0.2")
+	testImplementation(enforcedPlatform(project(":spring-boot-project:spring-boot-dependencies")))
+	testImplementation(project(":spring-boot-project:spring-boot-tools:spring-boot-test-support"))
+	testImplementation("javax.validation:validation-api")
+	testImplementation("org.assertj:assertj-core")
+	testImplementation("org.hamcrest:hamcrest-library")
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testImplementation("org.mockito:mockito-core")
+	testImplementation("org.projectlombok:lombok")
+	testImplementation("org.springframework:spring-core")
 }
